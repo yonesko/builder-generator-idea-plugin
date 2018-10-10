@@ -4,7 +4,7 @@ apply from: 'idea.gradle'
 apply plugin: 'checkstyle'
 
 // --- properties ---
-ext.ideaInstallationPath = 'C:/Users/Michal/AppData/Local/JetBrains/Toolbox/apps/IDEA-C/ch-0/171.4249.39'
+ext.ideaInstallationPath = '/Users/glebio/Library/Application Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/182.4505.22/IntelliJ IDEA.app/Contents'
 ext.ideaJdk = 'IntelliJ IDEA Community Edition IC-171.4249.39'
 sourceCompatibility = 1.8
 // --- properties ---
