@@ -141,6 +141,7 @@ public class DisplayChoosersTest {
         verify(memberChooserDialog).isOK();
         verify(createBuilderDialog).show();
         verify(memberChooserDialog).show();
-        verify(builderWriter).writeBuilder(eq(new BuilderContext(project, psiFieldsForBuilder, psiDirectory, CLASS_NAME, psiClassFromEditor, methodPrefix, isInner, hasButMethod, useSingleField)), eq(existingBuilder));
+        verify(builderWriter).writeBuilder(eq(new BuilderContext(project, psiFieldsForBuilder, psiDirectory, CLASS_NAME, psiClassFromEditor, methodPrefix, isInner, hasButMethod, useSingleField,
+                false)), eq(existingBuilder));
     }
 }

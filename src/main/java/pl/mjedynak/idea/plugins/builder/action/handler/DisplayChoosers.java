@@ -32,8 +32,9 @@ public class DisplayChoosers {
     private PsiFieldsForBuilderFactory psiFieldsForBuilderFactory;
 
     public DisplayChoosers(PsiHelper psiHelper, CreateBuilderDialogFactory createBuilderDialogFactory,
-                           PsiFieldSelector psiFieldSelector, MemberChooserDialogFactory memberChooserDialogFactory,
-                           BuilderWriter builderWriter, PsiFieldsForBuilderFactory psiFieldsForBuilderFactory) {
+            PsiFieldSelector psiFieldSelector, MemberChooserDialogFactory memberChooserDialogFactory,
+            BuilderWriter builderWriter, PsiFieldsForBuilderFactory psiFieldsForBuilderFactory)
+    {
         this.psiHelper = psiHelper;
         this.createBuilderDialogFactory = createBuilderDialogFactory;
         this.psiFieldSelector = psiFieldSelector;
@@ -52,21 +53,30 @@ public class DisplayChoosers {
             boolean innerBuilder = createBuilderDialog.isInnerBuilder();
             boolean useSingleField = createBuilderDialog.useSingleField();
             boolean hasButMethod = createBuilderDialog.hasButMethod();
-            List<PsiElementClassMember> fieldsToDisplay = getFieldsToIncludeInBuilder(psiClassFromEditor, innerBuilder, useSingleField, hasButMethod);
-            MemberChooser<PsiElementClassMember> memberChooserDialog = memberChooserDialogFactory.getMemberChooserDialog(fieldsToDisplay, project);
+            List<PsiElementClassMember> fieldsToDisplay =
+                    getFieldsToIncludeInBuilder(psiClassFromEditor, innerBuilder, useSingleField, hasButMethod);
+            MemberChooser<PsiElementClassMember> memberChooserDialog =
+                    memberChooserDialogFactory.getMemberChooserDialog(fieldsToDisplay, project);
             memberChooserDialog.show();
-            writeBuilderIfNecessary(targetDirectory, className, methodPrefix, memberChooserDialog, createBuilderDialog, existingBuilder);
+            writeBuilderIfNecessary(targetDirectory, className, methodPrefix, memberChooserDialog, createBuilderDialog,
+                    existingBuilder);
         }
     }
 
     @SuppressWarnings("rawtypes")
     private void writeBuilderIfNecessary(
-            PsiDirectory targetDirectory, String className, String methodPrefix, MemberChooser<PsiElementClassMember> memberChooserDialog, CreateBuilderDialog createBuilderDialog, PsiClass existingBuilder) {
+            PsiDirectory targetDirectory, String className, String methodPrefix,
+            MemberChooser<PsiElementClassMember> memberChooserDialog, CreateBuilderDialog createBuilderDialog,
+            PsiClass existingBuilder)
+    {
         if (memberChooserDialog.isOK()) {
             List<PsiElementClassMember> selectedElements = memberChooserDialog.getSelectedElements();
-            PsiFieldsForBuilder psiFieldsForBuilder = psiFieldsForBuilderFactory.createPsiFieldsForBuilder(selectedElements, psiClassFromEditor);
+            PsiFieldsForBuilder psiFieldsForBuilder =
+                    psiFieldsForBuilderFactory.createPsiFieldsForBuilder(selectedElements, psiClassFromEditor);
             BuilderContext context = new BuilderContext(
-                    project, psiFieldsForBuilder, targetDirectory, className, psiClassFromEditor, methodPrefix, createBuilderDialog.isInnerBuilder(), createBuilderDialog.hasButMethod(), createBuilderDialog.useSingleField());
+                    project, psiFieldsForBuilder, targetDirectory, className, psiClassFromEditor, methodPrefix,
+                    createBuilderDialog.isInnerBuilder(), createBuilderDialog.hasButMethod(),
+                    createBuilderDialog.useSingleField(), createBuilderDialog.addPrototypeMethod());
             builderWriter.writeBuilder(context, existingBuilder);
         }
     }
@@ -74,13 +84,16 @@ public class DisplayChoosers {
     private CreateBuilderDialog showDialog(PsiClass existingBuilder) {
         PsiDirectory srcDir = psiHelper.getPsiFileFromEditor(editor, project).getContainingDirectory();
         PsiPackage srcPackage = psiHelper.getPackage(srcDir);
-        CreateBuilderDialog dialog = createBuilderDialogFactory.createBuilderDialog(psiClassFromEditor, project, srcPackage, existingBuilder);
+        CreateBuilderDialog dialog = createBuilderDialogFactory
+                .createBuilderDialog(psiClassFromEditor, project, srcPackage, existingBuilder);
         dialog.show();
         return dialog;
     }
 
     @SuppressWarnings("rawtypes")
-    private List<PsiElementClassMember> getFieldsToIncludeInBuilder(PsiClass clazz, boolean innerBuilder, boolean useSingleField, boolean hasButMethod) {
+    private List<PsiElementClassMember> getFieldsToIncludeInBuilder(PsiClass clazz, boolean innerBuilder,
+            boolean useSingleField, boolean hasButMethod)
+    {
         return psiFieldSelector.selectFieldsToIncludeInBuilder(clazz, innerBuilder, useSingleField, hasButMethod);
     }
 

@@ -14,11 +14,13 @@ import pl.mjedynak.idea.plugins.builder.settings.CodeStyleSettings;
 import pl.mjedynak.idea.plugins.builder.verifier.PsiFieldVerifier;
 import pl.mjedynak.idea.plugins.builder.writer.BuilderContext;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.intellij.openapi.util.text.StringUtil.isVowel;
 
@@ -54,6 +56,10 @@ public class BuilderPsiClassBuilder {
 
     private boolean useSingleField = false;
     private boolean isInline = false;
+
+    private Object[] templateArgs() {
+        return new Object[]{builderClassName, srcClassName, srcClassFieldName};
+    }
 
     public BuilderPsiClassBuilder aBuilder(BuilderContext context) {
         initializeFields(context);
@@ -106,7 +112,8 @@ public class BuilderPsiClassBuilder {
     public BuilderPsiClassBuilder withPrivateConstructor() {
         PsiMethod constructor;
         if (useSingleField) {
-            constructor = elementFactory.createMethodFromText(builderClassName + "(){ " + srcClassFieldName + " = new " + srcClassName + "(); }", srcClass);
+            constructor = elementFactory.createMethodFromText(
+                    builderClassName + "(){ " + srcClassFieldName + " = new " + srcClassName + "(); }", srcClass);
         } else {
             constructor = elementFactory.createConstructor();
         }
@@ -116,10 +123,30 @@ public class BuilderPsiClassBuilder {
     }
 
     public BuilderPsiClassBuilder withInitializingMethod() {
-        String prefix = isVowel(srcClassName.toLowerCase(Locale.ENGLISH).charAt(0)) ? AN_PREFIX : A_PREFIX;
         PsiMethod staticMethod = elementFactory.createMethodFromText(
-                "public static " + builderClassName + prefix + srcClassName + "() { return new " + builderClassName + "(); }", srcClass);
+                "public static start() { return new " + builderClassName + "(); }", srcClass);
         builderClass.add(staticMethod);
+        return this;
+    }
+
+    private String getGetterName(PsiField psiField) {
+        return (PsiType.BOOLEAN.equals(psiField.getType()) ? "is" : "get")
+                + psiField.getName().substring(0, 1).toUpperCase() + psiField.getName().substring(1);
+    }
+
+    public BuilderPsiClassBuilder withPrototypePrivateConstructor() {
+        String fieldAssignment = allSelectedPsiFields.stream()
+                .map(psiField -> "this." + psiField.getName() + " = {2}." + getGetterName(psiField) + ";")
+                .collect(Collectors.joining("\n"));
+        MessageFormat template = new MessageFormat(
+                "private {0}({1} {2}) {\n"
+                        + fieldAssignment
+                        + "    }\n"
+        );
+
+        PsiMethod constructor = elementFactory.createMethodFromText(template.format(templateArgs()), srcClass);
+        constructor.getModifierList().setModifierProperty(PRIVATE_STRING, true);
+        builderClass.add(constructor);
         return this;
     }
 
@@ -144,7 +171,8 @@ public class BuilderPsiClassBuilder {
     }
 
     public BuilderPsiClassBuilder withButMethod() {
-        PsiMethod method = butMethodCreator.butMethod(builderClassName, builderClass, srcClass, srcClassFieldName, useSingleField);
+        PsiMethod method =
+                butMethodCreator.butMethod(builderClassName, builderClass, srcClass, srcClassFieldName, useSingleField);
         builderClass.add(method);
         return this;
     }
@@ -217,7 +245,8 @@ public class BuilderPsiClassBuilder {
             String fieldName = psiFieldsForSetter.getName();
             String fieldNameWithoutPrefix = fieldName.replaceFirst(fieldNamePrefix, "");
             String fieldNameUppercase = StringUtils.capitalize(fieldNameWithoutPrefix);
-            buildMethodText.append(srcClassFieldName).append(".set").append(fieldNameUppercase).append("(").append(fieldName).append(");");
+            buildMethodText.append(srcClassFieldName).append(".set").append(fieldNameUppercase).append("(")
+                    .append(fieldName).append(");");
         }
     }
 

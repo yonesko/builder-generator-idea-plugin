@@ -17,10 +17,13 @@ public class BuilderContext {
     private final boolean isInner;
     private final boolean hasButMethod;
     private final boolean useSingleField;
+    private final boolean addPrototypeMethod;
 
     public BuilderContext(Project project, PsiFieldsForBuilder psiFieldsForBuilder,
-                          PsiDirectory targetDirectory, String className, PsiClass psiClassFromEditor,
-                          String methodPrefix, boolean isInner, boolean hasButMethod, boolean useSingleField) {
+            PsiDirectory targetDirectory, String className, PsiClass psiClassFromEditor,
+            String methodPrefix, boolean isInner, boolean hasButMethod, boolean useSingleField,
+            boolean addPrototypeMethod)
+    {
         this.project = project;
         this.psiFieldsForBuilder = psiFieldsForBuilder;
         this.targetDirectory = targetDirectory;
@@ -30,6 +33,7 @@ public class BuilderContext {
         this.isInner = isInner;
         this.hasButMethod = hasButMethod;
         this.useSingleField = useSingleField;
+        this.addPrototypeMethod = addPrototypeMethod;
     }
 
     public Project getProject() {
@@ -70,7 +74,8 @@ public class BuilderContext {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(project, psiFieldsForBuilder, targetDirectory, className, psiClassFromEditor, methodPrefix);
+        return Objects
+                .hashCode(project, psiFieldsForBuilder, targetDirectory, className, psiClassFromEditor, methodPrefix);
     }
 
     @Override
